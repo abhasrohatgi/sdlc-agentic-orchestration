@@ -43,6 +43,26 @@
       <artifactId>h2</artifactId>
       <scope>runtime</scope>
     </dependency>
+
+    <!--
+      Spring Boot 4 split the test slices out of spring-boot-test-autoconfigure into
+      per-technology modules, and moved their packages with them:
+        @AutoConfigureMockMvc  org.springframework.boot.webmvc.test.autoconfigure
+        @DataJpaTest           org.springframework.boot.data.jpa.test.autoconfigure
+      spring-boot-starter-test no longer pulls these in, so they are declared explicitly.
+      (spring-boot-starter-test-classic would restore the old aggregate, but naming the two
+      slices actually used is clearer about what this module depends on.)
+    -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-webmvc-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa-test</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
