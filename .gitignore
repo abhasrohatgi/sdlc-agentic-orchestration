@@ -1,0 +1,30 @@
+# Build output
+target/
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# Orchestrator runtime state: run workspaces (each is its own nested git repo),
+# file-backed H2 database, and per-attempt logs. Never committed.
+.work/
+
+# Claude Code — personal overrides only; .claude/settings.json IS committed
+CLAUDE.local.md
+.claude/settings.local.json
+.claude/agent-memory-local/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+nbproject/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

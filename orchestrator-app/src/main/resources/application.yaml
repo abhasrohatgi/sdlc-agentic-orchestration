@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: orchestrator
+
+  threads:
+    virtual:
+      enabled: true
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+
+orchestrator:
+  # Root for all runtime state: run workspaces (each its own nested git repo), the
+  # file-backed event store, per-attempt staging directories and Maven logs.
+  # Gitignored at the project root.
+  work-dir: ./.work

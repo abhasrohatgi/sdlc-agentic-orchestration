@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <!--
+    Spring Boot 4.1.0 is the current stable line (supports Java 17-26).
+    Boot 3.5.x reached OSS end-of-life on 2026-06-30 and is deliberately not used.
+    Inheriting the starter parent gives us a single managed version for the whole
+    test stack (JUnit 6, Mockito, AssertJ, Byte Buddy), which is what keeps us clear
+    of the Java 25 class-file (major 69) breakage class in bytecode-manipulating libs.
+  -->
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>4.1.0</version>
+    <relativePath/>
+  </parent>
+
+  <groupId>com.agenticsdlc</groupId>
+  <artifactId>agentic-sdlc-parent</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <name>Agentic SDLC Orchestrator + URL Shortener</name>
+  <description>
+    An agentic SDLC orchestration engine and the URL shortener service it operates on.
+  </description>
+
+  <modules>
+    <module>orchestrator-core</module>
+    <module>orchestrator-agents</module>
+    <module>orchestrator-app</module>
+    <module>url-shortener</module>
+  </modules>
+
+  <properties>
+    <!--
+      Target Java 21 even though the build JDK here is 25.
+
+      Rationale: records, sealed types, pattern matching, record patterns and virtual
+      threads - everything this codebase actually uses - are final in 21. Targeting 21
+      costs us nothing and lets a reviewer on any JDK from 21 to 25 build and run this.
+      The one feature we forgo is ScopedValue (final in 25); run context is passed
+      explicitly through the Blackboard instead, which is better design regardless.
+
+      StructuredTaskScope is deliberately NOT used: it is still preview in Java 25
+      (JEP 505, fifth preview) and this build does not enable preview features.
+    -->
+    <java.version>21</java.version>
+    <maven.compiler.release>21</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+    <!--
+      JaCoCo 0.8.14 was the first release with official Java 25 support (0.8.13 had it
+      only as experimental). The agent instruments JDK and library classes regardless of
+      our own release level, so the newer version is required even at release=21.
+      Coverage is reported, never gated - a hard threshold would buy filler tests.
+    -->
+    <jacoco.version>0.8.15</jacoco.version>
+
+    <!--
+      Populated by jacoco:prepare-agent. Declared empty here so that Surefire's argLine
+      still resolves when JaCoCo is skipped (e.g. -Djacoco.skip=true).
+    -->
+    <jacocoArgLine/>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.agenticsdlc</groupId>
+        <artifactId>orchestrator-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticsdlc</groupId>
+        <artifactId>orchestrator-agents</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <!-- Every module gets the same test stack, versions managed by the Boot BOM. -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>${jacoco.version}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+    <plugins>
+      <!--
+        Populates a build property for every resolved dependency, named
+        "groupId:artifactId:type" and valued with that artifact's path in the local
+        repository. This is what makes ${org.mockito:mockito-core:jar} below resolve;
+        without it Surefire passes the token through literally and the forked JVM dies
+        with "Error opening zip file or JAR manifest missing".
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>resolve-artifact-paths</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>properties</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <!--
+            The Mockito javaagent must be declared explicitly: spring-boot-starter-parent
+            does NOT wire it. Without it, JDK 25 warns on dynamic agent loading (JEP 451),
+            and that warning becomes a hard error in a future JDK.
+          -->
+          <argLine>${jacocoArgLine} -javaagent:${org.mockito:mockito-core:jar}</argLine>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <argLine>${jacocoArgLine} -javaagent:${org.mockito:mockito-core:jar}</argLine>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>prepare-agent</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+            <configuration>
+              <propertyName>jacocoArgLine</propertyName>
+            </configuration>
+          </execution>
+          <execution>
+            <id>report</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

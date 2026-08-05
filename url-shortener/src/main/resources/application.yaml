@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: url-shortener
+
+  # In-memory H2. The shortener's data is demo data with no durability requirement, and
+  # running fully in-process is what lets a reviewer do `mvn spring-boot:run` with no
+  # Docker, no database install, and no setup steps.
+  #
+  # This is NOT the same choice as the orchestrator, whose H2 is file-backed because its
+  # durability across restarts is a load-bearing part of the design.
+  datasource:
+    url: jdbc:h2:mem:shortener;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+
+  # Virtual threads for request handling: the redirect path is I/O bound and this keeps
+  # the hot path cheap under concurrency. Final since Java 21, no preview flags.
+  threads:
+    virtual:
+      enabled: true
+
+server:
+  port: 8081
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
