@@ -28,6 +28,19 @@ spring:
 server:
   port: 8081
 
+logging:
+  # Structured JSON on stdout, so logs are queryable rather than grep-able. Built into
+  # Spring Boot, so no logback appender or extra dependency is needed.
+  #
+  # The correlation id set by CorrelationIdFilter is in the MDC, which the ECS format
+  # includes automatically - which is the point of putting it there rather than
+  # interpolating it into each message.
+  structured:
+    format:
+      console: ecs
+  level:
+    com.agenticsdlc: INFO
+
 management:
   endpoints:
     web:
@@ -38,3 +51,41 @@ management:
       probes:
         enabled: true
       show-details: always
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+
+shortener:
+  # Origin used to build the shortUrl field in responses. Override when deployed behind a
+  # real hostname, or every response will advertise a URL nobody can reach.
+  base-url: http://localhost:8081
+
+  # Storage adapter: jpa (default) or in-memory. Both pass the same contract test.
+  repository: jpa
+
+  analytics:
+    # Bounded on purpose. An unbounded queue does not remove the failure, it converts a
+    # latency problem into an out-of-memory one at peak load. Overflow is dropped and
+    # counted via the shortener.analytics.dropped metric.
+    queue-capacity: 10000
+
+  safety:
+    # Off by default: DNS resolution puts a network round trip on the create path and is
+    # defeated by rebinding, so it buys less than it appears to. See
+    # SsrfAwareUrlSafetyChecker for the full reasoning.
+    resolve-dns: false
+    denied-domains: []
+
+  rate-limit:
+    enabled: true
+    capacity: 60
+    refill: 60
+    refill-period: 1m
+
+  idempotency:
+    ttl: 10m
+    max-keys: 10000

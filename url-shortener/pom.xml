@@ -45,6 +45,17 @@
     </dependency>
 
     <!--
+      OpenAPI 3 generated from the controllers and served at /swagger-ui.html.
+      Version 3.x is the line that targets Spring Boot 4; 2.x is for Boot 3. Not managed by
+      the Boot BOM, so pinned here.
+    -->
+    <dependency>
+      <groupId>org.springdoc</groupId>
+      <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+      <version>3.1.0</version>
+    </dependency>
+
+    <!--
       Spring Boot 4 split the test slices out of spring-boot-test-autoconfigure into
       per-technology modules, and moved their packages with them:
         @AutoConfigureMockMvc  org.springframework.boot.webmvc.test.autoconfigure

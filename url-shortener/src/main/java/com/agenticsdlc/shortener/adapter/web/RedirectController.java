@@ -1,13 +1,16 @@
 package com.agenticsdlc.shortener.adapter.web;
 
 import com.agenticsdlc.shortener.application.LinkService;
+import com.agenticsdlc.shortener.domain.ClickEvent;
 import com.agenticsdlc.shortener.domain.ShortCode;
 import com.agenticsdlc.shortener.domain.ShortLink;
+import com.agenticsdlc.shortener.port.ClickEventSink;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -21,9 +24,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class RedirectController {
 
     private final LinkService linkService;
+    private final ClickEventSink clickEventSink;
 
-    public RedirectController(LinkService linkService) {
+    public RedirectController(LinkService linkService, ClickEventSink clickEventSink) {
         this.linkService = linkService;
+        this.clickEventSink = clickEventSink;
     }
 
     /**
@@ -39,8 +44,21 @@ public class RedirectController {
      * @return 302 to the target, 404 if unknown, 410 if expired
      */
     @GetMapping("/{code:[A-Za-z0-9_-]{1,32}}")
-    public ResponseEntity<Void> redirect(@PathVariable String code) {
+    public ResponseEntity<Void> redirect(
+            @PathVariable String code,
+            @RequestHeader(value = HttpHeaders.REFERER, required = false) String referrer,
+            @RequestHeader(value = HttpHeaders.USER_AGENT, required = false) String userAgent) {
+
         ShortLink link = linkService.resolve(new ShortCode(code));
+
+        // Recorded only after a successful resolve, so the counter measures served
+        // redirects rather than lookup attempts - a 404 is not a click on anything.
+        //
+        // The sink is contractually non-blocking and non-throwing, so this cannot slow or
+        // break the redirect. That guarantee is the sink's to keep, and it is asserted in
+        // AsyncClickEventSinkTest rather than defended with a try/catch here, which would
+        // only hide a breach of the contract.
+        clickEventSink.record(new ClickEvent(link.code(), linkService.now(), referrer, userAgent));
 
         return ResponseEntity.status(HttpStatus.FOUND)
                 .header(HttpHeaders.LOCATION, link.target().toString())

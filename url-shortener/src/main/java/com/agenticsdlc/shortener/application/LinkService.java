@@ -4,16 +4,17 @@ import com.agenticsdlc.shortener.domain.AliasAlreadyTakenException;
 import com.agenticsdlc.shortener.domain.InvalidTargetException;
 import com.agenticsdlc.shortener.domain.LinkExpiredException;
 import com.agenticsdlc.shortener.domain.LinkNotFoundException;
+import com.agenticsdlc.shortener.domain.LinkStats;
 import com.agenticsdlc.shortener.domain.ShortCode;
 import com.agenticsdlc.shortener.domain.ShortLink;
+import com.agenticsdlc.shortener.port.ClickStatsRepository;
 import com.agenticsdlc.shortener.port.CodeGenerator;
 import com.agenticsdlc.shortener.port.LinkRepository;
+import com.agenticsdlc.shortener.port.UrlSafetyChecker;
 import java.net.URI;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.Locale;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Application service for creating, resolving and removing short links.
@@ -37,15 +38,19 @@ public class LinkService {
      */
     private static final int MAX_CODE_ATTEMPTS = 5;
 
-    private static final Set<String> ALLOWED_SCHEMES = Set.of("http", "https");
-
     private final LinkRepository repository;
     private final CodeGenerator codeGenerator;
+    private final UrlSafetyChecker safetyChecker;
+    private final ClickStatsRepository clickStats;
     private final Clock clock;
 
-    public LinkService(LinkRepository repository, CodeGenerator codeGenerator, Clock clock) {
+    public LinkService(LinkRepository repository, CodeGenerator codeGenerator,
+                       UrlSafetyChecker safetyChecker, ClickStatsRepository clickStats,
+                       Clock clock) {
         this.repository = Objects.requireNonNull(repository, "repository must not be null");
         this.codeGenerator = Objects.requireNonNull(codeGenerator, "codeGenerator must not be null");
+        this.safetyChecker = Objects.requireNonNull(safetyChecker, "safetyChecker must not be null");
+        this.clickStats = Objects.requireNonNull(clickStats, "clickStats must not be null");
         this.clock = Objects.requireNonNull(clock, "clock must not be null");
     }
 
@@ -121,7 +126,11 @@ public class LinkService {
     }
 
     /**
-     * Deletes a link.
+     * Deletes a link and discards its click statistics.
+     *
+     * <p>Statistics are dropped along with the link rather than orphaned. Keeping them would
+     * leak the existence and click volume of a deleted link through the stats endpoint if a
+     * code were later reissued, and would grow memory for links nobody can reach.
      *
      * @throws LinkNotFoundException if no such code exists
      */
@@ -130,6 +139,23 @@ public class LinkService {
         if (!repository.deleteByCode(code)) {
             throw new LinkNotFoundException(code);
         }
+        clickStats.forget(code);
+    }
+
+    /**
+     * Click statistics for a link.
+     *
+     * <p>Expiry does not hide statistics: an expired link's history is still what an
+     * operator needs to see.
+     *
+     * @throws LinkNotFoundException if no such code exists
+     */
+    public LinkStats statsFor(ShortCode code) {
+        Objects.requireNonNull(code, "code must not be null");
+        // Existence is checked first so an unknown code is a 404 rather than an empty
+        // statistics document, which would imply the link exists and has no clicks.
+        get(code);
+        return clickStats.statsFor(code);
     }
 
     /** The clock this service reads, exposed so callers can report consistent timestamps. */
@@ -137,21 +163,18 @@ public class LinkService {
         return clock.instant();
     }
 
-    private static void validateTarget(URI target) {
-        if (!target.isAbsolute() || target.getScheme() == null) {
-            throw new InvalidTargetException(target,
-                    "target must be an absolute URL including a scheme");
-        }
-        String scheme = target.getScheme().toLowerCase(Locale.ROOT);
-        if (!ALLOWED_SCHEMES.contains(scheme)) {
-            // Rejecting anything other than http(s) closes off javascript:, data: and file:
-            // targets, which would otherwise turn every short link into a redirect-based
-            // delivery mechanism for whatever the creator wanted.
-            throw new InvalidTargetException(target,
-                    "scheme '" + scheme + "' is not allowed; use http or https");
-        }
-        if (target.getHost() == null || target.getHost().isBlank()) {
-            throw new InvalidTargetException(target, "target must include a host");
+    /**
+     * Applies the safety policy, translating a rejection into the exception the web layer
+     * knows how to render.
+     *
+     * <p>The policy itself lives behind {@link UrlSafetyChecker} rather than here, because
+     * what counts as an unacceptable target changes independently of the shortening use
+     * case, and because that port is where a threat-intelligence feed would attach.
+     */
+    private void validateTarget(URI target) {
+        UrlSafetyChecker.Verdict verdict = safetyChecker.check(target);
+        if (!verdict.safe()) {
+            throw new InvalidTargetException(target, verdict.reason());
         }
     }
 }

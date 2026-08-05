@@ -3,8 +3,10 @@ package com.agenticsdlc.shortener.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.agenticsdlc.shortener.adapter.analytics.InMemoryClickStatsRepository;
 import com.agenticsdlc.shortener.adapter.codegen.Base62CodeGenerator;
 import com.agenticsdlc.shortener.adapter.persistence.InMemoryLinkRepository;
+import com.agenticsdlc.shortener.adapter.safety.SsrfAwareUrlSafetyChecker;
 import com.agenticsdlc.shortener.domain.AliasAlreadyTakenException;
 import com.agenticsdlc.shortener.domain.InvalidTargetException;
 import com.agenticsdlc.shortener.domain.LinkExpiredException;
@@ -29,6 +31,7 @@ class LinkServiceTest {
     private static final URI TARGET = URI.create("https://example.com/page");
 
     private InMemoryLinkRepository repository;
+    private InMemoryClickStatsRepository clickStats;
     private MutableClock clock;
     private LinkService service;
 
@@ -36,7 +39,9 @@ class LinkServiceTest {
     void setUp() {
         repository = new InMemoryLinkRepository();
         clock = MutableClock.at("2026-08-05T10:00:00Z");
-        service = new LinkService(repository, new Base62CodeGenerator(), clock);
+        clickStats = new InMemoryClickStatsRepository();
+        service = new LinkService(repository, new Base62CodeGenerator(),
+                new SsrfAwareUrlSafetyChecker(), clickStats, clock);
     }
 
     @Nested
@@ -96,7 +101,8 @@ class LinkServiceTest {
             Deque<String> codes = new ArrayDeque<>(java.util.List.of("taken1", "free001"));
             CodeGenerator colliding = () -> ShortCode.of(codes.poll());
 
-            LinkService retrying = new LinkService(repository, colliding, clock);
+            LinkService retrying = new LinkService(repository, colliding,
+                    new SsrfAwareUrlSafetyChecker(), clickStats, clock);
             repository.saveIfAbsent(ShortLink.permanent(
                     ShortCode.of("taken1"), TARGET, clock.instant(), true));
 
@@ -109,7 +115,8 @@ class LinkServiceTest {
         @DisplayName("fails loudly when no free code can be obtained, rather than looping")
         void failsAfterExhaustingAttempts() {
             CodeGenerator alwaysSame = () -> ShortCode.of("stuck00");
-            LinkService stuck = new LinkService(repository, alwaysSame, clock);
+            LinkService stuck = new LinkService(repository, alwaysSame,
+                    new SsrfAwareUrlSafetyChecker(), clickStats, clock);
             repository.saveIfAbsent(ShortLink.permanent(
                     ShortCode.of("stuck00"), TARGET, clock.instant(), true));
 
