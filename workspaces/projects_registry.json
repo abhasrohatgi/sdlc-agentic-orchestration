@@ -1,0 +1,10 @@
+[ {
+  "projectId" : "url-shortner",
+  "projectName" : "url shortner",
+  "description" : "spring boot service to buils url shortner api",
+  "languageStack" : "JAVA",
+  "projectType" : "CUSTOM",
+  "scenarioType" : "GREENFIELD",
+  "createdAt" : "2026-08-08T18:09:03.876012Z",
+  "projectPath" : "/Users/abhasrohatgi/projects/charles-schwab/workspaces/url-shortner"
+} ]

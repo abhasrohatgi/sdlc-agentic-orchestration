@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- Custom Logback Appender that routes all logs through CliRenderer -->
+    <appender name="CLI_RENDERER" class="com.schwab.agenticsdlc.cli.CliRendererLogAppender" />
+
+    <!-- Root Logger Configuration -->
+    <root level="INFO">
+        <appender-ref ref="CLI_RENDERER" />
+    </root>
+
+    <!-- Suppress verbose third-party framework logs if needed -->
+    <logger name="org.apache.http" level="WARN" />
+    <logger name="com.google.api.client" level="WARN" />
+
+</configuration>
