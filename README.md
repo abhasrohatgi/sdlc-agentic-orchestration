@@ -1,34 +1,34 @@
-# AgenticSDLC — Autonomous Multi-Agent Software Engineering Framework
-> **Assignment Submission & Narrative Document**
+# 🚀 AgenticSDLC — Autonomous Multi-Agent Software Engineering Framework
+> **Assignment Submission & Narrative Document**  
 > *Interview Assignment: Build an Agentic Software Engineering System — URL Shortener*
 
 ---
 
-## 1. Executive Summary & Narrative
+## 🎯 1. Executive Summary & Narrative
 
 **AgenticSDLC** is an autonomous, multi-agent AI software engineering framework designed to transform high-level natural language software requirements into production-ready, fully verified Java codebases.
 
 Unlike standard code generators that produce disconnected snippets or swallow build errors, **AgenticSDLC** enforces a strict, human-governed engineering protocol:
-1. **Controlled Autonomy & Governance**: Every feature or project is first architected in `.ai-plan/plan.md` and submitted for explicit human approval before any code mutation occurs.
-2. **2-Phase Decoupled Manifest & Markdown Code Synthesis**: Eliminates LLM JSON syntax escaping failures by separating file manifest mapping (Phase 1) from raw Markdown code synthesis (Phase 2).
-3. **Topological Contract-First Synthesis**: Code is synthesized topologically in 3 ordered waves (Contracts/Schemas → Service Implementations → Integration Tests) to eliminate missing symbol errors.
-4. **Empirical Verification & Anti-Looping Self-Healing**: Code is verified against real local builds (`mvn test`). When compilation or test failures occur, an autonomous self-healing loop diagnoses root causes, retains history of past failed hypotheses to prevent repetitive loops, and applies targeted patches.
+1. **🛡️ Controlled Autonomy & Governance**: Every feature or project is first architected in `.ai-plan/plan.md` and submitted for explicit human approval before any code mutation occurs.
+2. **🧩 2-Phase Decoupled Manifest & Markdown Code Synthesis**: Eliminates LLM JSON syntax escaping failures by separating file manifest mapping (Phase 1) from raw Markdown code synthesis (Phase 2).
+3. **🏗️ Topological Contract-First Synthesis**: Code is synthesized topologically in 3 ordered waves (Contracts/Schemas → Service Implementations → Integration Tests) to eliminate missing symbol errors.
+4. **⚡ Empirical Verification & Anti-Looping Self-Healing**: Code is verified against real local builds (`mvn test`). When compilation or test failures occur, an autonomous self-healing loop diagnoses root causes, retains history of past failed hypotheses to prevent repetitive loops, and applies targeted patches.
 
 ---
 
-## 2. System Assumptions & Operational Boundaries
+## 📋 2. System Assumptions & Operational Boundaries
 
 To set clear operational scope for evaluation, **AgenticSDLC** operates under the following explicit assumptions:
 
-1. **Target Language**: Supports **Java** exclusively.
-2. **Workspace Storage**: All generated and managed projects are isolated under the local **`workspaces/`** directory (`workspaces/<project_id>/`).
-3. **LLM Credentials & Model Configuration**: Assumes **`LLM_API_KEY`** and **`LLM_MODEL`** are exported in system environment variables to configure Google Gemini access.
-4. **Build Environment Prerequisites**: Assumes Java 21 JDK and Apache Maven (`mvn`) binaries are installed and accessible on the host machine's system `PATH`.
-5. **Interactive Operator Governance**: Assumes an interactive CLI terminal session where a human operator reviews generated `.ai-plan/plan.md` architectural plans and enters explicit `Y/n` approval.
+1. **☕ Target Language**: Supports **Java** exclusively.
+2. **📁 Workspace Storage**: All generated and managed projects are isolated under the local **`workspaces/`** directory (`workspaces/<project_id>/`).
+3. **🔑 LLM Credentials & Model Configuration**: Assumes **`LLM_API_KEY`** and **`LLM_MODEL`** are exported in system environment variables to configure Google Gemini access.
+4. **⚙️ Build Environment Prerequisites**: Assumes Java 21 JDK and Apache Maven (`mvn`) binaries are installed and accessible on the host machine's system `PATH`.
+5. **👤 Interactive Operator Governance**: Assumes an interactive CLI terminal session where a human operator reviews generated `.ai-plan/plan.md` architectural plans and enters explicit `Y/n` approval.
 
 ---
 
-## 3. Multi-Agent Pipeline & DAG Architecture Diagram
+## 🏗️ 3. Multi-Agent Pipeline & DAG Architecture Diagram
 
 The **AgenticSDLC** orchestration engine operates as a **Directed Acyclic Graph (DAG)** of specialized agents. Execution flows strictly from requirement analysis to human governance, topological wave synthesis, and empirical build validation.
 
@@ -102,30 +102,30 @@ The **AgenticSDLC** orchestration engine operates as a **Directed Acyclic Graph 
 
 ---
 
-## 4. Demonstrating the Three Required SDLC Scenarios
+## 🌟 4. Demonstrating the Three Required SDLC Scenarios
 
 Per assignment requirements, **AgenticSDLC** handles greenfield, brownfield, and ambiguous software engineering workflows:
 
-### Scenario 1: Greenfield (New System from Scratch — URL Shortener)
+### 🟢 Scenario 1: Greenfield (New System from Scratch — URL Shortener)
 - **User Requirement**: *"Build a REST URL Shortener with Base62 encoding, custom short aliases, expiration timestamps, and click analytics."*
 - **Decomposition**: `PlanGeneratorAgent` decomposes the requirement into 27 discrete files across controller, service, repository, DTO, entity, exception, and test layers.
 - **Orchestration**: Executes 3-wave topological synthesis, creating `pom.xml`, `UrlEntity.java`, `Base62Encoder.java`, `UrlServiceImpl.java`, `UrlController.java`, and JUnit 5 test suites.
 - **Validation**: `QAValidatorAgent` executes `mvn test`, confirming 100% test pass rate.
 
-### Scenario 2: Brownfield (Incremental Evolution & Refactoring)
+### 🟡 Scenario 2: Brownfield (Incremental Evolution & Refactoring)
 - **User Requirement**: *"Add Redis caching layer to shorten URL redirect lookup latency in the existing url-shortener service."*
 - **Codebase Reasoning**: `ScenarioDetector` identifies an existing project at `workspaces/url-shortener`, switches to brownfield mode, inspects existing `pom.xml` and `UrlServiceImpl.java`, and isolates impacted files.
 - **Orchestration**: `CodeEngineerAgent` synthesizes `RedisConfig.java` and patches `UrlServiceImpl.java` to check Redis before querying Spring Data JPA.
 - **Validation**: Executes `mvn test` to verify backward compatibility and clean compilation.
 
-### Scenario 3: Ambiguous Requirements Disambiguation
+### 🔴 Scenario 3: Ambiguous Requirements Disambiguation
 - **User Requirement**: *"Make the URL shortener better and faster."*
 - **Requirement Normalization**: `ScenarioDetector` flags the prompt as `AMBIGUOUS`. `PlanGeneratorAgent` executes requirement normalization, expanding vague intent into explicit engineering criteria (caching strategy, database indexing, REST response codes, error handling) before writing `.ai-plan/plan.md`.
 - **Governance Gate**: Pauses for human operator approval, displaying normalized requirements for sign-off.
 
 ---
 
-## 5. Core Architectural & Design Decisions
+## ⚡ 5. Core Architectural & Design Decisions
 
 ### Decision 1: Plan-First Human Approval Protocol
 - **Problem**: Autonomous agents often mutate workspace files unpredictably, making uncoordinated code changes that break existing systems.
@@ -165,11 +165,11 @@ Per assignment requirements, **AgenticSDLC** handles greenfield, brownfield, and
 
 ---
 
-## 6. Assignment Observability & Telemetry Artifacts
+## 📊 6. Assignment Observability & Telemetry Artifacts
 
 **AgenticSDLC** provides end-to-end auditability and observability across every step of the orchestration pipeline.
 
-### Step-by-Step Trajectory Log (`workspaces/<project_id>/execution_trajectory.json`)
+### 📝 Step-by-Step Trajectory Log (`workspaces/<project_id>/execution_trajectory.json`)
 Per assignment requirements, every agent action, decision, timing, diagnostic reasoning, and modified file is recorded in real time:
 
 ```json
@@ -239,13 +239,13 @@ Per assignment requirements, every agent action, decision, timing, diagnostic re
 
 ---
 
-## 7. Setup & Execution Instructions
+## 🛠️ 7. Setup & Execution Instructions
 
-### Prerequisites
+### 1️⃣ Prerequisites
 1. Java 21 JDK installed (`java -version`).
 2. Apache Maven installed (`mvn -version`).
 
-### Environment Variables
+### 2️⃣ Environment Variables
 Export your Google Gemini API key and model name:
 
 ```bash
@@ -253,14 +253,14 @@ export LLM_API_KEY="your-gemini-api-key"
 export LLM_MODEL="gemini-2.5-flash"
 ```
 
-### Running the Prototype
+### 3️⃣ Running the Interactive Prototype
 Run the CLI orchestrator interactively:
 
 ```bash
 mvn compile exec:java -Dexec.mainClass="com.schwab.agenticsdlc.AgenticSdlcApplication"
 ```
 
-### Running Automated Test Suite
+### 4️⃣ Running Automated Verification Suite
 Execute the 30-unit-test verification suite:
 
 ```bash
@@ -269,21 +269,29 @@ mvn clean test
 
 ---
 
-## 8. Areas for Future Improvement & Technical Roadmap
+## 🏆 8. Key Achievements
+
+1. **✅ 100% Test Suite Reliability**: 30/30 unit tests passing cleanly across `OrchestratorEngine`, `CodeEngineerAgent`, `QAValidatorAgent`, `LlmClientManager`, `WorkspaceManager`, `ManifestParser`, `CliRendererLogAppender`, and `ExecutionTrajectoryLogger`.
+2. **🔧 Autonomous Build Self-Healing**: Successfully diagnoses and repairs JDK 21 compiler crashes, missing imports, and broken dependencies without human code intervention.
+3. **💻 Enterprise Terminal UX & Observability**: Integrated Logback appender (`CliRendererLogAppender`) routing 100% of internal logs through a formatted terminal UI while persisting structured step-by-step trajectory JSON logs.
+
+---
+
+## 💡 9. Areas for Future Improvement & Technical Roadmap
 
 While **AgenticSDLC** provides a solid, working prototype with multi-agent orchestration and self-healing build verification, bringing it to full production parity with state-of-the-art coding agents (such as Antigravity or Claude CLI) requires additional development time, resources, and architectural refinement:
 
-1. **Multi-Language & Technology Ecosystem Expansion**:
+1. **🌐 Multi-Language & Technology Ecosystem Expansion**:
    - Extend language stack classifiers and build execution templates beyond Java to natively support **Python (pytest / poetry)**, **TypeScript/Node.js (npm / vitest)**, and **Go (go test)** ecosystems.
 
-2. **Decentralized Multi-Agent & Sidecar Observability**:
+2. **🕸️ Decentralized Multi-Agent & Sidecar Observability**:
    - Transition from a single orchestrator process into a **decentralized event-driven agent network**, where independent agent sidecars handle code generation, static analysis, and observability telemetry concurrently across distributed worker nodes.
 
-3. **High-Throughput Parallel Synthesis**:
+3. **⚡ High-Throughput Parallel Synthesis**:
    - Parallelize Wave 1 leaf contract generation across 8 worker threads to reduce initial project creation latency from 50s down to ~15s.
 
-4. **In-Memory LSP & Tree-Sitter AST Validation**:
+4. **🌳 In-Memory LSP & Tree-Sitter AST Validation**:
    - Integrate in-memory Language Server Protocol (LSP) and Tree-Sitter AST validation to catch syntax and symbol reference errors instantly before invoking local process builds (`mvn test`).
 
-5. **Local Vector Indexing for Brownfield Codebases**:
+5. **🔍 Local Vector Indexing for Brownfield Codebases**:
    - Incorporate a local vector index (HNSW / Lucene) for instant, semantic context retrieval across massive, legacy brownfield codebases.
