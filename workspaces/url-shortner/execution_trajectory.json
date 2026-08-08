@@ -5,7 +5,7 @@
   "scenarioType" : "GREENFIELD",
   "startTime" : "2026-08-08T18:09:08.258246Z",
   "endTime" : "2026-08-08T18:16:36.163692Z",
-  "finalStatus" : "RUNNING",
+  "finalStatus" : "PASSED",
   "steps" : [ {
     "stepIndex" : 1,
     "stage" : "PIPELINE_INIT",
