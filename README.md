@@ -165,7 +165,7 @@ Per assignment requirements, **AgenticSDLC** handles greenfield, brownfield, and
 
 ---
 
-## 📊 6. Assignment Observability & Telemetry Artifacts
+## 📊 6. Observability & Telemetry Artifacts
 
 **AgenticSDLC** provides end-to-end auditability and observability across every step of the orchestration pipeline.
 
