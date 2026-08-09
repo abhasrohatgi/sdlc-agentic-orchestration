@@ -295,3 +295,12 @@ While **AgenticSDLC** provides a solid, working prototype with multi-agent orche
 
 5. **🔍 Local Vector Indexing for Brownfield Codebases**:
    - Incorporate a local vector index (HNSW / Lucene) for instant, semantic context retrieval across massive, legacy brownfield codebases.
+  
+6. **🧠 Extended Context & Long-Horizon Memory Management**:
+   - Shift from localized generation contexts to long-horizon memory management and repo-wide dependency tracking.
+   - Improve first-pass code generation quality to reach parity with SOTA coding agents—drastically reducing reliance on reactive self-healing retry loops, token overhead, and build-fix latency.
+
+7. **🎯 Domain-Specific Skill & Enterprise Pattern Injection**:
+   - Equip code-generation agents with deterministic skill sets and strict architectural rulesets, specifically tailored to idiomatic **Java, Maven, and Spring Boot** standards.
+   - Enforce enterprise best practices (e.g., Layered/Clean Architecture, DTO-Entity separation, standardized REST conventions, and clean `pom.xml` dependency management) to prevent code quality drift and anti-patterns.
+
